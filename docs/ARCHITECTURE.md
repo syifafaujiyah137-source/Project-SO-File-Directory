@@ -20,6 +20,7 @@ Aplikasi berjalan sepenuhnya di sisi klien (browser) dengan tiga lapisan:
 ├─────────────────────────────────────────┤
 │  Data Layer                             │
 │  fileSystem.js · data/files.json        │
+│  (+ salinan data/files.js)              │
 └─────────────────────────────────────────┘
 ```
 
@@ -27,7 +28,7 @@ Aplikasi berjalan sepenuhnya di sisi klien (browser) dengan tiga lapisan:
 |---------|------|----------------|
 | Presentation | `index.html`, `css/style.css`, `js/app.js` | Menampilkan UI, menangkap input, merender hasil |
 | Logic | `js/search.js` | Mencocokkan nama, memfilter ekstensi, mengurutkan hasil |
-| Data | `js/fileSystem.js`, `data/files.json` | Menyimpan dan menyediakan virtual file system |
+| Data | `js/fileSystem.js`, `data/files.json`, `data/files.js` | Menyimpan dan menyediakan virtual file system |
 
 ## 3. Alur Data
 
@@ -57,11 +58,12 @@ Setiap file direpresentasikan sebagai objek:
 ```json
 {
   "id": 1,
-  "name": "laporan-praktikum",
+  "name": "Laporan_Kuliah",
   "extension": "pdf",
-  "size": 245760,
-  "path": "/Documents/Kuliah/laporan-praktikum.pdf",
-  "modifiedAt": "2026-11-10T09:30:00"
+  "size": 250880,
+  "path": "D:\\Dokumen\\Kuliah\\Laporan_Kuliah.pdf",
+  "modifiedAt": "2026-09-10T14:30:00",
+  "hidden": false
 }
 ```
 
@@ -71,15 +73,29 @@ Setiap file direpresentasikan sebagai objek:
 | `name` | string | Nama file tanpa ekstensi |
 | `extension` | string | `pdf`, `docx`, `jpg`, `png`, atau `mp4` (huruf kecil) |
 | `size` | number | Ukuran dalam byte |
-| `path` | string | Lokasi lengkap pada virtual file system |
+| `path` | string | Lokasi lengkap termasuk nama file, gaya Windows (`D:\Folder\file.ext`; di JSON ditulis `\\`) |
 | `modifiedAt` | string | Waktu modifikasi (ISO 8601) |
+| `hidden` | boolean | Atribut file tersembunyi (untuk pengaturan "Tampilkan file tersembunyi") |
+
+Struktur virtual drive `D:\`: `Dokumen` (`Kuliah`, `Proyek`), `Gambar` (`Desain`, `Magang`), `Video`, dan `Proyek`.
+
+### Sumber data dan salinan
+
+- `data/files.json` adalah **sumber utama** data simulasi.
+- `data/files.js` adalah salinan berbentuk `const FILES_FALLBACK = [...]`. Browser menolak `fetch()` saat `index.html` dibuka langsung (`file://`), jadi `loadFiles()` memakai salinan ini sebagai cadangan. Dengan cara ini aplikasi tetap bisa dibuka langsung tanpa server.
+- Setelah mengubah `files.json`, buat ulang `files.js` dari folder `data/`:
+
+```bash
+{ echo "// Salinan files.json agar aplikasi bisa dibuka langsung lewat file://."; echo "// Dibuat otomatis dari files.json; jangan diedit manual."; printf 'const FILES_FALLBACK = '; node -e "process.stdout.write(JSON.stringify(JSON.parse(require('fs').readFileSync('files.json','utf8')),null,2))"; echo ";"; } > files.js
+```
 
 ## 5. Komponen Modul
 
 ### 5.1 `fileSystem.js`
+- `loadFiles()` — async; memuat `data/files.json` lewat `fetch`, memakai `FILES_FALLBACK` bila gagal, lalu memvalidasi dan menormalkan data (ekstensi huruf kecil, `hidden` selalu ada)
 - `getAllFiles()` — mengembalikan seluruh daftar file
-- `getFilesByDirectory(path)` — mengembalikan file pada direktori tertentu
-- `loadFiles()` — memuat data dari `data/files.json` atau data bawaan
+- `getFilesByDirectory(path, includeSubfolders = true)` — mengembalikan file pada direktori tertentu (tanpa beda huruf besar/kecil, opsional termasuk subfolder)
+- `getDirectory(file)` — mengambil direktori dari path lengkap file
 
 ### 5.2 `search.js`
 - `searchFiles(query, extension)` — fungsi utama pencarian
@@ -88,7 +104,7 @@ Setiap file direpresentasikan sebagai objek:
 - `sortFiles(files, key, order)` — pengurutan hasil
 
 ### 5.3 `app.js`
-- Inisialisasi aplikasi dan event listener
+- Inisialisasi aplikasi (menunggu `loadFiles()` selesai) dan event listener
 - `renderResults(files)` — menampilkan hasil ke DOM
 - `formatSize(bytes)` dan `formatDate(iso)` — pemformat tampilan
 
@@ -113,13 +129,16 @@ Pengembangan opsional: **indexing** (peta ekstensi → daftar file) agar filter 
 | Virtual file system | Browser tidak boleh mengakses file sistem secara bebas; simulasi lebih aman dan mudah didemokan |
 | Pemisahan UI, logika, dan data | Memudahkan pengujian dan perawatan |
 | Data dalam JSON | Mudah diubah tanpa menyentuh kode |
+| Salinan data `files.js` sebagai cadangan `fetch` | Aplikasi tetap bisa dibuka langsung lewat `index.html` (`file://`) |
+| Path gaya Windows (`D:\...`) | Sesuai desain UI |
+| UI mengikuti desain mode gelap | Mode terang dikerjakan anggota lain |
 
 ## 8. Keterkaitan dengan Konsep Sistem Operasi
 
 | Komponen aplikasi | Konsep OS |
 |-------------------|-----------|
 | Virtual file system | Struktur direktori dan file system |
-| Atribut file | Metadata file (inode/FCB) |
+| Atribut file | Metadata file (inode/FCB), termasuk atribut hidden |
 | Pencarian file | Operasi pada file system, searching, indexing |
 | UI pencarian | Abstraksi layanan OS bagi pengguna |
 
