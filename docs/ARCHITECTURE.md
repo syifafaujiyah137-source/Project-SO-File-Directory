@@ -132,6 +132,7 @@ Pengembangan opsional: **indexing** (peta ekstensi → daftar file) agar filter 
 | Salinan data `files.js` sebagai cadangan `fetch` | Aplikasi tetap bisa dibuka langsung lewat `index.html` (`file://`) |
 | Path gaya Windows (`D:\...`) | Sesuai desain UI |
 | UI mengikuti desain mode gelap | Mode terang dikerjakan anggota lain |
+| Tema lewat CSS custom properties dan `<html data-theme>` | Satu stylesheet untuk dua tema; pilihan (`settings.darkMode`) disimpan di `localStorage`, gelap sebagai bawaan |
 
 ## 8. Keterkaitan dengan Konsep Sistem Operasi
 

@@ -56,7 +56,7 @@ const state = {
   folder: ROOT_PATH,
   filesView: 'cards',            // 'cards' atau 'tree' (tidak disimpan)
   expanded: new Set([ROOT_PATH.toLowerCase()]), // folder yang terbuka pada pohon
-  settings: { ignoreCase: true, includeSubfolders: true, showHidden: false, location: '' },
+  settings: { ignoreCase: true, includeSubfolders: true, showHidden: false, location: '', darkMode: true },
   history: [],
   openedIds: [],
   searchCount: { date: '', count: 0 }
@@ -64,6 +64,14 @@ const state = {
 
 let recordTimer = null;
 let toastTimer = null;
+
+/* ---------- Tema ---------- */
+
+// Tema gelap adalah bawaan (sesuai desain); tema terang memakai atribut data-theme="light"
+function applyTheme() {
+  const dark = state.settings.darkMode !== false;
+  document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+}
 
 /* ---------- Penyimpanan (localStorage, opsional) ---------- */
 
@@ -77,6 +85,7 @@ function loadState() {
   } catch (e) {
     // localStorage tidak tersedia atau data rusak: pakai nilai bawaan
   }
+  applyTheme();
 }
 
 function saveState() {
@@ -466,6 +475,7 @@ function renderSettings() {
   ['ignoreCase', 'includeSubfolders', 'showHidden'].forEach((key) => {
     $('set-' + key).checked = state.settings[key];
   });
+  $('set-darkMode').checked = state.settings.darkMode !== false;
   const select = $('set-location');
   select.replaceChildren();
   select.append(new Option('D:\\ (Semua folder)', ''));
@@ -548,6 +558,11 @@ function bindEvents() {
 
   ['ignoreCase', 'includeSubfolders', 'showHidden'].forEach((key) => {
     $('set-' + key).addEventListener('change', (e) => { state.settings[key] = e.target.checked; saveState(); });
+  });
+  $('set-darkMode').addEventListener('change', (e) => {
+    state.settings.darkMode = e.target.checked;
+    applyTheme();
+    saveState();
   });
   $('set-location').addEventListener('change', (e) => { state.settings.location = e.target.value; saveState(); });
   $('clear-history').addEventListener('click', () => {

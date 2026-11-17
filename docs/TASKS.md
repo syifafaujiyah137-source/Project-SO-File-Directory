@@ -72,13 +72,13 @@ Mengikuti desain **mode gelap** (`Desain_SO_MODE_HYTAM.pdf`); mode terang dikerj
 - [x] Tampilan pohon folder (tree view) — pilihan "Pohon" di halaman File Saya (`getFolderTree()`)
 - [x] Pencarian berdasarkan ukuran dan tanggal (panel "Filter lanjutan" di halaman Cari)
 - [x] Riwayat pencarian (`localStorage`)
-- [ ] Mode gelap
+- [x] Mode gelap — tema gelap (bawaan) dan terang lewat CSS variables; saklar di Pengaturan, tersimpan di `localStorage`. Tema terang bersifat sementara sampai desain mode terang tersedia
 
 ## Fase 8 — Laporan & Pengumpulan
 
-- [ ] Menjelaskan kaitan project dengan materi Sistem Operasi
-- [ ] Menyusun laporan sesuai template
-- [ ] Menyiapkan tangkapan layar aplikasi
+- [x] Menjelaskan kaitan project dengan materi Sistem Operasi (BAB II laporan, bagian 2.6)
+- [~] Menyusun laporan sesuai template — laporan sudah dibuat dengan struktur standar; sesuaikan bila dosen punya template (identitas sampul masih kosong)
+- [x] Menyiapkan tangkapan layar aplikasi (tema gelap dan terang, tertanam di laporan)
 - [ ] Menyiapkan presentasi/demo (jika diminta)
 - [ ] Final check dan pengumpulan
 
