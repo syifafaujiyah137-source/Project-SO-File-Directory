@@ -69,7 +69,7 @@ Mengikuti desain **mode gelap** (`Desain_SO_MODE_HYTAM.pdf`); mode terang dikerj
 ## Fase 7 — Pengembangan Tambahan (Opsional)
 
 - [x] Indexing berdasarkan ekstensi (`buildExtensionIndex()`, `getFilesByExtension()`)
-- [ ] Tampilan pohon folder (tree view)
+- [x] Tampilan pohon folder (tree view) — pilihan "Pohon" di halaman File Saya (`getFolderTree()`)
 - [x] Pencarian berdasarkan ukuran dan tanggal (panel "Filter lanjutan" di halaman Cari)
 - [x] Riwayat pencarian (`localStorage`)
 - [ ] Mode gelap

@@ -54,6 +54,8 @@ const state = {
   selectedId: null,
   advanced: { sizeIndex: 0, dateFrom: '', dateTo: '' }, // filter per pencarian, tidak disimpan
   folder: ROOT_PATH,
+  filesView: 'cards',            // 'cards' atau 'tree' (tidak disimpan)
+  expanded: new Set([ROOT_PATH.toLowerCase()]), // folder yang terbuka pada pohon
   settings: { ignoreCase: true, includeSubfolders: true, showHidden: false, location: '' },
   history: [],
   openedIds: [],
@@ -331,7 +333,81 @@ function renderSearch() {
   renderDetail(results.find((f) => f.id === state.selectedId));
 }
 
+// Membuka semua folder induk dari path agar folder terpilih terlihat di pohon
+function expandTo(path) {
+  const parts = path.split('\\').filter((p) => p !== '');
+  let current = parts[0];
+  state.expanded.add((current + '\\').toLowerCase());
+  parts.slice(1).forEach((name) => {
+    current += '\\' + name;
+    state.expanded.add(current.toLowerCase());
+  });
+}
+
+function sameFolder(a, b) {
+  return a.replace(/\\+$/, '').toLowerCase() === b.replace(/\\+$/, '').toLowerCase();
+}
+
+function selectFolder(path) {
+  state.folder = path;
+  expandTo(path);
+  renderFiles();
+}
+
+function treeNode(node) {
+  const key = node.path.toLowerCase();
+  const open = state.expanded.has(key);
+  const hasChildren = node.children.length > 0;
+  const item = make('li');
+  const row = make('div', 'tree-row');
+
+  const toggle = make('button', 'tree-toggle');
+  toggle.type = 'button';
+  if (hasChildren) {
+    toggle.setAttribute('aria-expanded', String(open));
+    toggle.setAttribute('aria-label', (open ? 'Tutup ' : 'Buka ') + node.name);
+    toggle.addEventListener('click', () => {
+      if (open) state.expanded.delete(key); else state.expanded.add(key);
+      renderFiles();
+    });
+  } else {
+    toggle.disabled = true;
+    toggle.setAttribute('aria-hidden', 'true');
+  }
+
+  const label = make('button', 'tree-label');
+  label.type = 'button';
+  label.setAttribute('aria-pressed', String(sameFolder(state.folder, node.path)));
+  const icon = make('span');
+  icon.innerHTML = ICONS.folder;
+  label.append(icon, make('span', '', node.name), make('small', '', node.totalCount + ' file'));
+  label.addEventListener('click', () => selectFolder(node.path));
+
+  row.append(toggle, label);
+  item.append(row);
+  if (hasChildren && open) {
+    const list = make('ul', 'tree-children');
+    node.children.forEach((child) => list.append(treeNode(child)));
+    item.append(list);
+  }
+  return item;
+}
+
+function renderTree() {
+  const tree = $('tree');
+  tree.replaceChildren();
+  const list = make('ul');
+  list.append(treeNode(getFolderTree(state.settings.showHidden)));
+  tree.append(list);
+}
+
 function renderFiles() {
+  const isTree = state.filesView === 'tree';
+  $('vs-cards').setAttribute('aria-pressed', String(!isTree));
+  $('vs-tree').setAttribute('aria-pressed', String(isTree));
+  $('folders').hidden = isTree;
+  $('tree').hidden = !isTree;
+  if (isTree) renderTree();
   const folders = $('folders');
   folders.replaceChildren();
   topFolders().forEach((name) => {
@@ -345,7 +421,7 @@ function renderFiles() {
     const info = make('span');
     info.append(make('b', '', name), make('small', '', total + ' file'));
     card.append(ico, info);
-    card.addEventListener('click', () => { state.folder = path; renderFiles(); });
+    card.addEventListener('click', () => selectFolder(path));
     folders.append(card);
   });
 
@@ -466,6 +542,8 @@ function bindEvents() {
     renderAdvanced();
   });
 
+  $('vs-cards').addEventListener('click', () => { state.filesView = 'cards'; renderFiles(); });
+  $('vs-tree').addEventListener('click', () => { state.filesView = 'tree'; expandTo(state.folder); renderFiles(); });
   $('location-up').addEventListener('click', () => { state.folder = ROOT_PATH; renderFiles(); });
 
   ['ignoreCase', 'includeSubfolders', 'showHidden'].forEach((key) => {

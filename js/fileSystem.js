@@ -103,3 +103,44 @@ function getFilesByDirectory(path, includeSubfolders = true) {
 function getFilesByExtension(extensions) {
   return extensions.flatMap((extension) => extensionIndex.get(extension) || []);
 }
+
+// Membuat satu simpul folder untuk pohon direktori
+function createFolderNode(name, path) {
+  return { name, path, fileCount: 0, totalCount: 0, children: [] };
+}
+
+// Mengurutkan anak folder berdasarkan nama, secara rekursif
+function sortFolderTree(node) {
+  node.children.sort((a, b) => a.name.localeCompare(b.name, 'id', { sensitivity: 'base' }));
+  node.children.forEach(sortFolderTree);
+}
+
+// Membangun pohon folder dari path semua file.
+// Setiap simpul: { name, path, fileCount (langsung di folder itu),
+// totalCount (termasuk subfolder), children }.
+// includeHidden = false menyembunyikan file hidden dari hitungan.
+function getFolderTree(includeHidden = false) {
+  const files = includeHidden ? fileList : fileList.filter((file) => !file.hidden);
+  const drive = files.length > 0 ? getDirectory(files[0]).split(PATH_SEPARATOR)[0] : 'D:';
+  const root = createFolderNode(drive, drive + PATH_SEPARATOR);
+
+  files.forEach((file) => {
+    const folders = getDirectory(file).split(PATH_SEPARATOR).slice(1).filter((name) => name !== '');
+    let node = root;
+    node.totalCount += 1;
+    folders.forEach((name) => {
+      let child = node.children.find((item) => item.name.toLowerCase() === name.toLowerCase());
+      if (!child) {
+        const childPath = node === root ? root.path + name : node.path + PATH_SEPARATOR + name;
+        child = createFolderNode(name, childPath);
+        node.children.push(child);
+      }
+      child.totalCount += 1;
+      node = child;
+    });
+    node.fileCount += 1;
+  });
+
+  sortFolderTree(root);
+  return root;
+}

@@ -85,7 +85,12 @@
         <p class="sub">Jelajahi seluruh folder dan file di drive simulasi.</p>
         <div class="location"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h7l2 2h9v11H3z"/></svg>Lokasi: <span id="location-text"></span>
           <button id="location-up" class="link-btn" type="button" hidden>Kembali ke D:\</button></div>
+        <div class="view-switch" role="group" aria-label="Tampilan folder">
+          <button id="vs-cards" class="chip" type="button" aria-pressed="true">Kartu</button>
+          <button id="vs-tree" class="chip" type="button" aria-pressed="false">Pohon</button>
+        </div>
         <div class="folders" id="folders"></div>
+        <nav class="tree" id="tree" aria-label="Pohon folder" hidden></nav>
         <h2>Semua File</h2>
         <div class="list" id="files-list"></div>
       </section>
