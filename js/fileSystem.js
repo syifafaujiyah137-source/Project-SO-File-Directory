@@ -10,6 +10,9 @@ const REQUIRED_FIELDS = ['name', 'extension', 'size', 'path', 'modifiedAt'];
 // Daftar file simulasi (diisi oleh loadFiles)
 let fileList = [];
 
+// Indeks ekstensi: peta ekstensi -> daftar file (dibangun oleh buildExtensionIndex)
+let extensionIndex = new Map();
+
 // Memeriksa apakah objek file memiliki metadata wajib dan ekstensi yang didukung
 function isValidFile(file) {
   const hasAllFields = REQUIRED_FIELDS.every((field) => file[field] !== undefined);
@@ -50,10 +53,23 @@ async function fetchFileData() {
   }
 }
 
-// Memuat data file simulasi ke dalam fileList
+// Membangun indeks ekstensi sekali saja (O(n)) agar filter ekstensi
+// tidak perlu memeriksa seluruh file pada setiap pencarian
+function buildExtensionIndex() {
+  extensionIndex = new Map();
+  fileList.forEach((file) => {
+    if (!extensionIndex.has(file.extension)) {
+      extensionIndex.set(file.extension, []);
+    }
+    extensionIndex.get(file.extension).push(file);
+  });
+}
+
+// Memuat data file simulasi ke dalam fileList lalu membangun indeksnya
 async function loadFiles() {
   const data = await fetchFileData();
   fileList = data.filter(isValidFile).map(normalizeFile);
+  buildExtensionIndex();
   return fileList;
 }
 
@@ -80,4 +96,10 @@ function getFilesByDirectory(path, includeSubfolders = true) {
     }
     return includeSubfolders && directory.startsWith(target + PATH_SEPARATOR);
   });
+}
+
+// Mengembalikan file dengan ekstensi tertentu lewat indeks.
+// extensions: array ekstensi huruf kecil, contoh ['jpg', 'png'].
+function getFilesByExtension(extensions) {
+  return extensions.flatMap((extension) => extensionIndex.get(extension) || []);
 }

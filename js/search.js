@@ -42,25 +42,37 @@ function matchName(file, query, ignoreCase = true) {
     .every((word) => name.includes(word));
 }
 
-// Mencocokkan ekstensi file.
-// extension: 'all' / kosong = semua, 'pdf', atau array seperti ['jpg', 'png'].
-function matchExtension(file, extension) {
+// Menyeragamkan filter ekstensi menjadi array huruf kecil tanpa titik.
+// Mengembalikan [] bila filter berarti "semua" ('all' / kosong).
+function normalizeExtensions(extension) {
   const wanted = (Array.isArray(extension) ? extension : [extension])
     .filter((item) => typeof item === 'string')
     .map((item) => item.trim().toLowerCase().replace(/^\./, ''))
     .filter((item) => item !== '');
 
-  if (wanted.length === 0 || wanted.includes(EXTENSION_ALL)) {
-    return true;
-  }
-  return wanted.includes(file.extension);
+  return wanted.includes(EXTENSION_ALL) ? [] : [...new Set(wanted)];
 }
 
-// Menentukan daftar file yang menjadi kandidat berdasarkan lokasi dan file tersembunyi
-function getCandidateFiles(options) {
-  const files = options.location
-    ? getFilesByDirectory(options.location, options.includeSubfolders)
-    : getAllFiles();
+// Mencocokkan ekstensi file.
+// extension: 'all' / kosong = semua, 'pdf', atau array seperti ['jpg', 'png'].
+function matchExtension(file, extension) {
+  const wanted = normalizeExtensions(extension);
+  return wanted.length === 0 || wanted.includes(file.extension);
+}
+
+// Menentukan daftar file yang menjadi kandidat berdasarkan lokasi, ekstensi, dan file tersembunyi.
+// Tanpa lokasi dan dengan filter ekstensi tertentu, kandidat diambil dari indeks ekstensi
+// sehingga file berekstensi lain tidak perlu diperiksa.
+function getCandidateFiles(options, extension) {
+  const wanted = normalizeExtensions(extension);
+  let files;
+  if (options.location) {
+    files = getFilesByDirectory(options.location, options.includeSubfolders);
+  } else if (wanted.length > 0) {
+    files = getFilesByExtension(wanted);
+  } else {
+    files = getAllFiles();
+  }
   return options.showHidden ? files : files.filter((file) => !file.hidden);
 }
 
@@ -68,7 +80,7 @@ function getCandidateFiles(options) {
 function searchFiles(query, extension = EXTENSION_ALL, options = {}) {
   const settings = { ...DEFAULT_SEARCH_OPTIONS, ...options };
 
-  return getCandidateFiles(settings).filter(
+  return getCandidateFiles(settings, extension).filter(
     (file) =>
       matchName(file, query, settings.ignoreCase) &&
       matchExtension(file, extension)

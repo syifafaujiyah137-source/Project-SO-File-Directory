@@ -58,17 +58,17 @@ Mengikuti desain **mode gelap** (`Desain_SO_MODE_HYTAM.pdf`); mode terang dikerj
 
 ## Fase 6 — Pengujian
 
-- [ ] Uji pencarian nama
-- [ ] Uji filter tiap ekstensi
-- [ ] Uji kombinasi nama + ekstensi
-- [ ] Uji kasus ekstrem (query kosong, karakter khusus)
-- [ ] Uji di beberapa browser (Chrome, Firefox, Edge)
-- [ ] Uji di layar kecil dan besar
-- [ ] Perbaiki bug yang ditemukan
+- [x] Uji pencarian nama
+- [x] Uji filter tiap ekstensi
+- [x] Uji kombinasi nama + ekstensi
+- [x] Uji kasus ekstrem (query kosong, karakter khusus)
+- [~] Uji di beberapa browser (Chrome, Firefox, Edge) — Chromium sudah lulus; Firefox dan Edge belum
+- [x] Uji di layar kecil dan besar
+- [x] Perbaiki bug yang ditemukan (belum ada bug pada pengujian otomatis)
 
 ## Fase 7 — Pengembangan Tambahan (Opsional)
 
-- [ ] Indexing berdasarkan ekstensi
+- [x] Indexing berdasarkan ekstensi (`buildExtensionIndex()`, `getFilesByExtension()`)
 - [ ] Tampilan pohon folder (tree view)
 - [ ] Pencarian berdasarkan ukuran dan tanggal
 - [x] Riwayat pencarian (`localStorage`)
