@@ -29,6 +29,12 @@ function normalizeFile(file) {
 // Saat index.html dibuka langsung (file://), fetch ditolak browser,
 // sehingga dipakai salinan data di data/files.js (FILES_FALLBACK).
 async function fetchFileData() {
+  // Dibuka langsung dari file://: lewati fetch agar console bersih dari error
+  const isLocalFile = typeof location !== 'undefined' && location.protocol === 'file:';
+  if (isLocalFile && typeof FILES_FALLBACK !== 'undefined') {
+    return FILES_FALLBACK;
+  }
+
   try {
     const response = await fetch(FILES_URL);
     if (!response.ok) {

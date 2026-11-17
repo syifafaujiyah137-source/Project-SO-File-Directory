@@ -34,25 +34,27 @@ Daftar tugas dan progres **File Search Simulator**.
 
 ## Fase 4 — Logika Pencarian
 
-- [ ] `matchName()` (case-insensitive, sebagian kata)
-- [ ] `matchExtension()`
-- [ ] `searchFiles(query, extension)`
-- [ ] `sortFiles()` (nama, ukuran, tanggal)
-- [ ] Menangani kasus: query kosong, tanpa hasil, spasi berlebih
+- [x] `matchName()` (case-insensitive, sebagian kata)
+- [x] `matchExtension()` (ekstensi tunggal atau gabungan, mis. JPG/PNG)
+- [x] `searchFiles(query, extension, options)` (opsi: abaikan huruf besar/kecil, subfolder, file tersembunyi, lokasi)
+- [x] `sortFiles()` (nama, ukuran, tanggal; naik/turun)
+- [x] Menangani kasus: query kosong, tanpa hasil, spasi berlebih
 
 ## Fase 5 — Antarmuka (UI)
 
 Mengikuti desain **mode gelap** (`Desain_SO_MODE_HYTAM.pdf`); mode terang dikerjakan anggota lain.
 
-- [ ] Kolom pencarian nama
-- [ ] Filter ekstensi (Semua, PDF, DOCX, JPG, PNG, MP4)
-- [ ] Daftar hasil (nama, ekstensi, ukuran, path, tanggal)
-- [ ] Ikon/penanda jenis file
-- [ ] Pesan "file tidak ditemukan"
-- [ ] Jumlah hasil pencarian
-- [ ] Opsi pengurutan hasil
-- [ ] Tampilan responsif
-- [ ] `formatSize()` dan `formatDate()`
+- [x] Kolom pencarian nama
+- [x] Filter ekstensi (Semua, PDF, Docs, JPG/PNG, MP4 — JPG dan PNG digabung sesuai desain)
+- [x] Daftar hasil (nama, ekstensi, ukuran, path, tanggal)
+- [x] Ikon/penanda jenis file
+- [x] Pesan "file tidak ditemukan"
+- [x] Jumlah hasil pencarian
+- [x] Opsi pengurutan hasil
+- [x] Tampilan responsif
+- [x] `formatSize()` dan `formatDate()`
+- [x] Halaman Beranda, File Saya, Terbaru, dan Pengaturan sesuai desain
+- [x] Panel detail file dan tombol "Buka File" (simulasi)
 
 ## Fase 6 — Pengujian
 
@@ -69,7 +71,7 @@ Mengikuti desain **mode gelap** (`Desain_SO_MODE_HYTAM.pdf`); mode terang dikerj
 - [ ] Indexing berdasarkan ekstensi
 - [ ] Tampilan pohon folder (tree view)
 - [ ] Pencarian berdasarkan ukuran dan tanggal
-- [ ] Riwayat pencarian (`localStorage`)
+- [x] Riwayat pencarian (`localStorage`)
 - [ ] Mode gelap
 
 ## Fase 8 — Laporan & Pengumpulan

@@ -2,58 +2,122 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>File Search Simulator</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <header class="app-header">
-    <h1>File Search Simulator</h1>
-    <p>Simulasi pencarian file berdasarkan nama dan ekstensi</p>
-  </header>
-
-  <main class="app-main">
-    <!-- Area pencarian dan filter -->
-    <section class="search-panel" aria-label="Pencarian file">
-      <div class="form-group">
-        <label for="search-input">Nama file</label>
-        <input type="text" id="search-input" placeholder="Ketik nama file...">
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <svg class="brand-logo" viewBox="0 0 48 40" aria-hidden="true"><path d="M3 8a4 4 0 0 1 4-4h12l4 5h18a4 4 0 0 1 4 4v21a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4z" fill="#e0a45c"/><path d="M3 16h42v17a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4z" fill="url(#lg)"/><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#d86b82"/><stop offset="1" stop-color="#7b4fd0"/></linearGradient></defs></svg>
+        <div><strong>File Search Simulator</strong><span>Sistem Operasi</span></div>
       </div>
+      <nav class="nav" aria-label="Menu utama">
+        <button class="nav-item" data-view="home" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11l8-7 8 7v9H4z"/></svg>Beranda</button>
+        <button class="nav-item" data-view="search" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="M16 16l4 4"/></svg>Cari</button>
+        <button class="nav-item" data-view="files" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h7l2 2h9v11H3z"/></svg>File Saya</button>
+        <button class="nav-item" data-view="recent" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 3-6.2M4 4v4h4M12 8v5l3 2"/></svg>Terbaru</button>
+        <button class="nav-item" data-view="settings" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></svg>Pengaturan</button>
+      </nav>
+      <p class="tip">Cari file dengan nama atau jenis ekstensi file.</p>
+    </aside>
 
-      <div class="form-group">
-        <label for="extension-filter">Ekstensi</label>
-        <select id="extension-filter">
-          <option value="all">Semua</option>
-          <option value="pdf">PDF</option>
-          <option value="docx">DOCX</option>
-          <option value="jpg">JPG</option>
-          <option value="png">PNG</option>
-          <option value="mp4">MP4</option>
-        </select>
-      </div>
+    <main class="main">
+      <!-- Beranda -->
+      <section id="view-home" class="view" aria-labelledby="t-home">
+        <h1 id="t-home">Selamat datang di File Search Simulator</h1>
+        <p class="sub">Simulasikan cara sistem operasi menemukan file berdasarkan nama dan jenis ekstensinya.</p>
+        <form id="home-form" class="searchbar" role="search">
+          <label class="sr-only" for="home-input">Cari file</label>
+          <input id="home-input" type="search" placeholder="Search" autocomplete="off">
+          <button class="search-btn" type="submit" aria-label="Cari"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="M16 16l4 4"/></svg></button>
+        </form>
+        <div class="stats" id="stats"></div>
+        <h2>File Terbaru Dibuka</h2>
+        <div class="list" id="home-recent"></div>
+        <h2>Pencarian Terakhir</h2>
+        <div class="chips" id="home-history"></div>
+      </section>
 
-      <div class="form-group">
-        <label for="sort-select">Urutkan</label>
-        <select id="sort-select">
-          <option value="name">Nama</option>
-          <option value="size">Ukuran</option>
-          <option value="modifiedAt">Tanggal</option>
-        </select>
-      </div>
-    </section>
+      <!-- Cari -->
+      <section id="view-search" class="view" aria-label="Cari file" hidden>
+        <div class="searchbar">
+          <label class="sr-only" for="search-input">Nama file</label>
+          <input id="search-input" type="text" placeholder="Cari nama file..." autocomplete="off">
+          <button id="search-clear" class="clear-btn" type="button" aria-label="Hapus pencarian" hidden>&times;</button>
+          <span class="search-btn" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="M16 16l4 4"/></svg></span>
+        </div>
+        <div class="search-grid">
+          <div class="search-main">
+            <div class="chips" id="filters" role="group" aria-label="Filter jenis file"></div>
+            <div class="result-head">
+              <p id="result-count" aria-live="polite"></p>
+              <label class="select"><span class="sr-only">Urutkan hasil</span>
+                <select id="sort"></select>
+              </label>
+            </div>
+            <div class="list" id="results"></div>
+            <div class="empty" id="empty" hidden>
+              <div class="empty-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="M16 16l4 4M9 9l4 4M13 9l-4 4"/></svg></div>
+              <h3>File tidak ditemukan</h3>
+              <p id="empty-text"></p>
+              <button id="empty-reset" class="btn" type="button">Hapus Pencarian</button>
+            </div>
+          </div>
+          <aside class="detail" id="detail" aria-label="Detail file"></aside>
+        </div>
+      </section>
 
-    <!-- Area hasil pencarian -->
-    <section class="result-panel" aria-label="Hasil pencarian">
-      <p id="result-count" class="result-count"></p>
-      <ul id="result-list" class="result-list"></ul>
-      <p id="empty-message" class="empty-message" hidden>File tidak ditemukan.</p>
-    </section>
-  </main>
+      <!-- File Saya -->
+      <section id="view-files" class="view" aria-labelledby="t-files" hidden>
+        <h1 id="t-files">File Saya</h1>
+        <p class="sub">Jelajahi seluruh folder dan file di drive simulasi.</p>
+        <div class="location"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h7l2 2h9v11H3z"/></svg>Lokasi: <span id="location-text"></span>
+          <button id="location-up" class="link-btn" type="button" hidden>Kembali ke D:\</button></div>
+        <div class="folders" id="folders"></div>
+        <h2>Semua File</h2>
+        <div class="list" id="files-list"></div>
+      </section>
 
-  <footer class="app-footer">
-    <p>Reisya Heryadi &middot; NPM 257006111002 &middot; Informatika, Universitas Siliwangi</p>
-  </footer>
+      <!-- Terbaru -->
+      <section id="view-recent" class="view" aria-labelledby="t-recent" hidden>
+        <h1 id="t-recent">Terbaru</h1>
+        <p class="sub">File yang baru dibuka atau diubah.</p>
+        <div id="recent-groups"></div>
+      </section>
 
+      <!-- Pengaturan -->
+      <section id="view-settings" class="view" aria-labelledby="t-settings" hidden>
+        <h1 id="t-settings">Pengaturan</h1>
+        <p class="sub">Atur cara pencarian file dan tampilan aplikasi.</p>
+        <h2>Pencarian</h2>
+        <div class="panel">
+          <label class="setting"><span><b>Abaikan huruf besar/kecil</b><small>Pencarian "laporan" juga menemukan file bernama "Laporan".</small></span>
+            <input type="checkbox" role="switch" class="switch" id="set-ignoreCase"></label>
+          <label class="setting"><span><b>Cari sampai ke subfolder</b><small>Telusuri seluruh isi folder yang dipilih, termasuk folder di dalamnya.</small></span>
+            <input type="checkbox" role="switch" class="switch" id="set-includeSubfolders"></label>
+          <label class="setting"><span><b>Tampilkan file tersembunyi</b><small>Sertakan file yang diberi atribut hidden dalam hasil pencarian.</small></span>
+            <input type="checkbox" role="switch" class="switch" id="set-showHidden"></label>
+        </div>
+        <h2>Lokasi &amp; Riwayat</h2>
+        <div class="panel">
+          <label class="setting"><span><b>Lokasi pencarian</b><small>Drive atau folder yang akan dicari.</small></span>
+            <span class="select"><select id="set-location"></select></span></label>
+          <div class="setting"><span><b>Riwayat pencarian</b><small>Hapus daftar pencarian terakhir yang tampil di Beranda.</small></span>
+            <button id="clear-history" class="btn" type="button">Hapus Riwayat</button></div>
+        </div>
+        <h2>Tampilan</h2>
+        <div class="panel">
+          <label class="setting"><span><b>Mode gelap</b><small>Gunakan tema gelap pada seluruh aplikasi. Mode terang belum tersedia.</small></span>
+            <input type="checkbox" role="switch" class="switch" checked disabled></label>
+        </div>
+      </section>
+    </main>
+  </div>
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+  <!-- Urutan penting: data → file system → pencarian → UI -->
   <script src="data/files.js"></script>
   <script src="js/fileSystem.js"></script>
   <script src="js/search.js"></script>
