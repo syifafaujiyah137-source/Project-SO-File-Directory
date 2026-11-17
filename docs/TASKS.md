@@ -18,19 +18,19 @@ Daftar tugas dan progres **File Search Simulator**.
 
 ## Fase 2 — Setup Project
 
-- [ ] Membuat struktur folder (`css/`, `js/`, `data/`)
-- [ ] Membuat `index.html` kerangka dasar
-- [ ] Membuat `css/style.css` kosong dan menautkannya
-- [ ] Membuat `js/app.js`, `js/fileSystem.js`, `js/search.js` dan menautkannya
+- [x] Membuat struktur folder (`css/`, `js/`, `data/`)
+- [x] Membuat `index.html` kerangka dasar
+- [x] Membuat `css/style.css` kosong dan menautkannya
+- [x] Membuat `js/app.js`, `js/fileSystem.js`, `js/search.js` dan menautkannya
 - [ ] Inisialisasi repositori Git
 
 ## Fase 3 — Data / Virtual File System
 
-- [ ] Menyusun `data/files.json` (minimal 30 file contoh)
-- [ ] Mencakup semua ekstensi: PDF, DOCX, JPG, PNG, MP4
-- [ ] Menambahkan metadata: `name`, `extension`, `size`, `path`, `modifiedAt`
-- [ ] Membuat `loadFiles()` dan `getAllFiles()` di `fileSystem.js`
-- [ ] Membuat `getFilesByDirectory(path)`
+- [x] Menyusun `data/files.json` (minimal 30 file contoh) — 34 file
+- [x] Mencakup semua ekstensi: PDF, DOCX, JPG, PNG, MP4
+- [x] Menambahkan metadata: `name`, `extension`, `size`, `path`, `modifiedAt` (+ `id`, `hidden`)
+- [x] Membuat `loadFiles()` dan `getAllFiles()` di `fileSystem.js`
+- [x] Membuat `getFilesByDirectory(path)`
 
 ## Fase 4 — Logika Pencarian
 
@@ -41,6 +41,8 @@ Daftar tugas dan progres **File Search Simulator**.
 - [ ] Menangani kasus: query kosong, tanpa hasil, spasi berlebih
 
 ## Fase 5 — Antarmuka (UI)
+
+Mengikuti desain **mode gelap** (`Desain_SO_MODE_HYTAM.pdf`); mode terang dikerjakan anggota lain.
 
 - [ ] Kolom pencarian nama
 - [ ] Filter ekstensi (Semua, PDF, DOCX, JPG, PNG, MP4)
@@ -85,3 +87,4 @@ Daftar tugas dan progres **File Search Simulator**.
 - Perbarui file ini setiap tugas selesai.
 - Tugas baru ditambahkan pada fase yang sesuai.
 - Tambahkan tanggal atau nama pengerja bila bekerja berkelompok.
+- Setelah mengubah `data/files.json`, buat ulang `data/files.js` (lihat `ARCHITECTURE.md` bagian 4).

@@ -29,8 +29,8 @@ function handleSearch() {
 }
 
 // Inisialisasi aplikasi
-function init() {
-  loadFiles();
+async function init() {
+  await loadFiles();
   searchInput.addEventListener('input', handleSearch);
   extensionFilter.addEventListener('change', handleSearch);
   sortSelect.addEventListener('change', handleSearch);
