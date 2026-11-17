@@ -1,0 +1,87 @@
+# TASKS
+
+Daftar tugas dan progres **File Search Simulator**.
+
+**Legenda:** `[ ]` belum · `[~]` sedang dikerjakan · `[x]` selesai
+
+---
+
+## Fase 1 — Dokumentasi & Perencanaan
+
+- [x] Menentukan topik dan ruang lingkup project
+- [x] Membuat `README.md`
+- [x] Membuat `CLAUDE.md`
+- [x] Membuat `ARCHITECTURE.md`
+- [x] Membuat `CONTRIBUTING.md`
+- [x] Membuat `TASKS.md`
+- [ ] Menentukan pembagian tugas anggota (jika berkelompok)
+
+## Fase 2 — Setup Project
+
+- [ ] Membuat struktur folder (`css/`, `js/`, `data/`)
+- [ ] Membuat `index.html` kerangka dasar
+- [ ] Membuat `css/style.css` kosong dan menautkannya
+- [ ] Membuat `js/app.js`, `js/fileSystem.js`, `js/search.js` dan menautkannya
+- [ ] Inisialisasi repositori Git
+
+## Fase 3 — Data / Virtual File System
+
+- [ ] Menyusun `data/files.json` (minimal 30 file contoh)
+- [ ] Mencakup semua ekstensi: PDF, DOCX, JPG, PNG, MP4
+- [ ] Menambahkan metadata: `name`, `extension`, `size`, `path`, `modifiedAt`
+- [ ] Membuat `loadFiles()` dan `getAllFiles()` di `fileSystem.js`
+- [ ] Membuat `getFilesByDirectory(path)`
+
+## Fase 4 — Logika Pencarian
+
+- [ ] `matchName()` (case-insensitive, sebagian kata)
+- [ ] `matchExtension()`
+- [ ] `searchFiles(query, extension)`
+- [ ] `sortFiles()` (nama, ukuran, tanggal)
+- [ ] Menangani kasus: query kosong, tanpa hasil, spasi berlebih
+
+## Fase 5 — Antarmuka (UI)
+
+- [ ] Kolom pencarian nama
+- [ ] Filter ekstensi (Semua, PDF, DOCX, JPG, PNG, MP4)
+- [ ] Daftar hasil (nama, ekstensi, ukuran, path, tanggal)
+- [ ] Ikon/penanda jenis file
+- [ ] Pesan "file tidak ditemukan"
+- [ ] Jumlah hasil pencarian
+- [ ] Opsi pengurutan hasil
+- [ ] Tampilan responsif
+- [ ] `formatSize()` dan `formatDate()`
+
+## Fase 6 — Pengujian
+
+- [ ] Uji pencarian nama
+- [ ] Uji filter tiap ekstensi
+- [ ] Uji kombinasi nama + ekstensi
+- [ ] Uji kasus ekstrem (query kosong, karakter khusus)
+- [ ] Uji di beberapa browser (Chrome, Firefox, Edge)
+- [ ] Uji di layar kecil dan besar
+- [ ] Perbaiki bug yang ditemukan
+
+## Fase 7 — Pengembangan Tambahan (Opsional)
+
+- [ ] Indexing berdasarkan ekstensi
+- [ ] Tampilan pohon folder (tree view)
+- [ ] Pencarian berdasarkan ukuran dan tanggal
+- [ ] Riwayat pencarian (`localStorage`)
+- [ ] Mode gelap
+
+## Fase 8 — Laporan & Pengumpulan
+
+- [ ] Menjelaskan kaitan project dengan materi Sistem Operasi
+- [ ] Menyusun laporan sesuai template
+- [ ] Menyiapkan tangkapan layar aplikasi
+- [ ] Menyiapkan presentasi/demo (jika diminta)
+- [ ] Final check dan pengumpulan
+
+---
+
+## Catatan
+
+- Perbarui file ini setiap tugas selesai.
+- Tugas baru ditambahkan pada fase yang sesuai.
+- Tambahkan tanggal atau nama pengerja bila bekerja berkelompok.
