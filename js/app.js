@@ -25,6 +25,15 @@ const SORTS = [
   { label: 'Urutkan: Terkecil', key: 'size', order: 'asc' }
 ];
 
+// Pilihan ukuran file (byte); batas bersifat inklusif
+const MB = 1024 * 1024;
+const SIZE_RANGES = [
+  { label: 'Semua ukuran', min: null, max: null },
+  { label: 'Kecil (< 1 MB)', min: null, max: MB - 1 },
+  { label: 'Sedang (1-10 MB)', min: MB, max: 10 * MB },
+  { label: 'Besar (> 10 MB)', min: 10 * MB + 1, max: null }
+];
+
 const TYPE_LABELS = { pdf: 'PDF', docx: 'Docs', jpg: 'JPG', png: 'PNG', mp4: 'MP4' };
 
 // Ikon statis (aman untuk innerHTML karena bukan data pengguna)
@@ -43,6 +52,7 @@ const state = {
   filterIndex: 0,
   sortIndex: 0,
   selectedId: null,
+  advanced: { sizeIndex: 0, dateFrom: '', dateTo: '' }, // filter per pencarian, tidak disimpan
   folder: ROOT_PATH,
   settings: { ignoreCase: true, includeSubfolders: true, showHidden: false, location: '' },
   history: [],
@@ -142,7 +152,24 @@ function topFolders() {
 }
 
 function searchOptions() {
-  return { ...state.settings };
+  const size = SIZE_RANGES[state.advanced.sizeIndex];
+  return {
+    ...state.settings,
+    minSize: size.min,
+    maxSize: size.max,
+    dateFrom: state.advanced.dateFrom,
+    dateTo: state.advanced.dateTo
+  };
+}
+
+// Jumlah filter lanjutan yang sedang aktif (ukuran, tanggal dari, tanggal sampai)
+function advancedCount() {
+  const { sizeIndex, dateFrom, dateTo } = state.advanced;
+  return (sizeIndex > 0 ? 1 : 0) + (dateFrom ? 1 : 0) + (dateTo ? 1 : 0);
+}
+
+function resetAdvanced() {
+  state.advanced = { sizeIndex: 0, dateFrom: '', dateTo: '' };
 }
 
 function currentResults() {
@@ -263,11 +290,22 @@ function renderDetail(file) {
   box.append(iconNode(file.extension, 'detail-ico'), make('h3', '', file.name + '.' + file.extension), dl, open);
 }
 
+function renderAdvanced() {
+  const count = advancedCount();
+  const toggle = $('adv-toggle');
+  toggle.textContent = count ? 'Filter lanjutan (' + count + ')' : 'Filter lanjutan';
+  toggle.classList.toggle('active', count > 0 && toggle.getAttribute('aria-expanded') !== 'true');
+  $('adv-size').value = String(state.advanced.sizeIndex);
+  if ($('adv-from').value !== state.advanced.dateFrom) $('adv-from').value = state.advanced.dateFrom;
+  if ($('adv-to').value !== state.advanced.dateTo) $('adv-to').value = state.advanced.dateTo;
+}
+
 function renderSearch() {
   const input = $('search-input');
   if (input.value !== state.query) input.value = state.query;
   $('search-clear').hidden = !state.query;
   renderFilters();
+  renderAdvanced();
 
   const results = currentResults();
   if (!results.some((f) => f.id === state.selectedId)) {
@@ -288,7 +326,7 @@ function renderSearch() {
   if (empty) {
     $('empty-text').textContent = state.query
       ? 'Tidak ada file yang cocok dengan "' + state.query + '". Coba kata kunci lain atau ubah filter jenis ekstensi.'
-      : 'Tidak ada file dengan jenis ekstensi ini. Coba pilih filter lain.';
+      : 'Tidak ada file yang cocok dengan filter yang dipilih. Coba ubah atau hapus filter.';
   }
   renderDetail(results.find((f) => f.id === state.selectedId));
 }
@@ -384,6 +422,7 @@ function openFile(file) {
 function resetSearch() {
   state.query = '';
   state.filterIndex = 0;
+  resetAdvanced();
   renderSearch();
   $('search-input').focus();
 }
@@ -414,6 +453,18 @@ function bindEvents() {
   const sort = $('sort');
   SORTS.forEach((s, i) => sort.append(new Option(s.label, String(i))));
   sort.addEventListener('change', () => { state.sortIndex = Number(sort.value); renderSearch(); });
+
+  SIZE_RANGES.forEach((r, i) => $('adv-size').append(new Option(r.label, String(i))));
+  $('adv-size').addEventListener('change', (e) => { state.advanced.sizeIndex = Number(e.target.value); renderSearch(); });
+  $('adv-from').addEventListener('change', (e) => { state.advanced.dateFrom = e.target.value; renderSearch(); });
+  $('adv-to').addEventListener('change', (e) => { state.advanced.dateTo = e.target.value; renderSearch(); });
+  $('adv-reset').addEventListener('click', () => { resetAdvanced(); renderSearch(); });
+  $('adv-toggle').addEventListener('click', () => {
+    const open = $('adv-panel').hidden;
+    $('adv-panel').hidden = !open;
+    $('adv-toggle').setAttribute('aria-expanded', String(open));
+    renderAdvanced();
+  });
 
   $('location-up').addEventListener('click', () => { state.folder = ROOT_PATH; renderFiles(); });
 

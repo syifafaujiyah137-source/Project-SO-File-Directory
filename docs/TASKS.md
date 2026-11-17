@@ -70,7 +70,7 @@ Mengikuti desain **mode gelap** (`Desain_SO_MODE_HYTAM.pdf`); mode terang dikerj
 
 - [x] Indexing berdasarkan ekstensi (`buildExtensionIndex()`, `getFilesByExtension()`)
 - [ ] Tampilan pohon folder (tree view)
-- [ ] Pencarian berdasarkan ukuran dan tanggal
+- [x] Pencarian berdasarkan ukuran dan tanggal (panel "Filter lanjutan" di halaman Cari)
 - [x] Riwayat pencarian (`localStorage`)
 - [ ] Mode gelap
 

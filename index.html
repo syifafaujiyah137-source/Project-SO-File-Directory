@@ -53,9 +53,19 @@
             <div class="chips" id="filters" role="group" aria-label="Filter jenis file"></div>
             <div class="result-head">
               <p id="result-count" aria-live="polite"></p>
-              <label class="select"><span class="sr-only">Urutkan hasil</span>
-                <select id="sort"></select>
-              </label>
+              <div class="result-tools">
+                <button id="adv-toggle" class="tool-btn" type="button" aria-expanded="false" aria-controls="adv-panel">Filter lanjutan</button>
+                <label class="select"><span class="sr-only">Urutkan hasil</span>
+                  <select id="sort"></select>
+                </label>
+              </div>
+            </div>
+            <div class="adv" id="adv-panel" hidden>
+              <label class="field"><span>Ukuran file</span>
+                <span class="select"><select id="adv-size"></select></span></label>
+              <label class="field"><span>Diubah dari</span><input type="date" id="adv-from"></label>
+              <label class="field"><span>Diubah sampai</span><input type="date" id="adv-to"></label>
+              <button id="adv-reset" class="link-btn" type="button">Atur ulang filter</button>
             </div>
             <div class="list" id="results"></div>
             <div class="empty" id="empty" hidden>

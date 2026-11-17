@@ -97,6 +97,17 @@ h2 { margin: 24px 0 10px; font-size: 14px; }
 .btn { border: 0; border-radius: var(--radius); background: var(--grad); color: #fff; font-weight: 700; padding: 9px 18px; font-size: 12px; }
 .btn:hover { filter: brightness(1.08); }
 
+/* Filter lanjutan */
+.result-tools { display: flex; gap: 10px; align-items: center; }
+.tool-btn { border: 0; border-radius: var(--radius); background: var(--card); color: var(--ink); padding: 8px 12px; font-size: 12px; font-weight: 700; }
+.tool-btn:hover { background: var(--card-hover); }
+.tool-btn[aria-expanded="true"], .tool-btn.active { background: var(--grad); color: #fff; }
+.adv { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px 16px; margin: 0 0 12px; padding: 12px 16px; border-radius: var(--radius); background: var(--card); color: var(--ink); }
+.field { display: flex; flex-direction: column; gap: 4px; font-size: 11px; color: var(--muted); }
+.field input[type="date"] { border: 1px solid #b8b8b8; border-radius: 8px; background: #fff; color: var(--ink); padding: 6px 8px; font-size: 12px; }
+.adv .select select { background: #fff; border: 1px solid #b8b8b8; }
+.adv .link-btn { margin-left: auto; }
+
 /* Panel detail */
 .detail { background: var(--card); color: var(--ink); border-radius: var(--radius); padding: 20px 16px; min-height: 320px; display: flex; flex-direction: column; position: sticky; top: 0; }
 .detail-empty { margin: auto; text-align: center; color: var(--muted); font-size: 12px; }
