@@ -522,7 +522,7 @@ function renderSettings() {
   select.value = state.settings.location;
 }
 
-const RENDERERS = { home: renderHome, search: renderSearch, files: renderFiles, recent: renderRecent, settings: renderSettings };
+const RENDERERS = { home: renderHome, search: renderSearch, files: renderFiles, recent: renderRecent, visual: renderVisual, settings: renderSettings };
 
 function showView(name) {
   state.view = name;

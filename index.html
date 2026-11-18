@@ -18,6 +18,7 @@
         <button class="nav-item" data-view="search" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="M16 16l4 4"/></svg>Cari</button>
         <button class="nav-item" data-view="files" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h7l2 2h9v11H3z"/></svg>File Saya</button>
         <button class="nav-item" data-view="recent" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 3-6.2M4 4v4h4M12 8v5l3 2"/></svg>Terbaru</button>
+        <button class="nav-item" data-view="visual" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20v-6M12 20V5M19 20v-9"/></svg>Visualisasi</button>
         <button class="nav-item" data-view="settings" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></svg>Pengaturan</button>
       </nav>
       <p class="tip">Cari file dengan nama atau jenis ekstensi file.</p>
@@ -102,6 +103,37 @@
         <div id="recent-groups"></div>
       </section>
 
+      <!-- Visualisasi Algoritma -->
+      <section id="view-visual" class="view" aria-labelledby="t-visual" hidden>
+        <h1 id="t-visual">Visualisasi Algoritma</h1>
+        <p class="sub">Lihat langkah demi langkah cara sistem mencari file: linear search dibandingkan dengan indexing ekstensi.</p>
+        <div class="panel vz-controls">
+          <input id="vz-query" class="vz-input" type="text" placeholder="Nama file, mis. laporan" autocomplete="off" aria-label="Nama file yang dicari" value="laporan">
+          <span class="select"><select id="vz-ext" aria-label="Jenis ekstensi"></select></span>
+          <div class="chips" role="group" aria-label="Algoritma">
+            <button id="vz-algo-linear" class="chip" type="button" aria-pressed="true">Linear Search</button>
+            <button id="vz-algo-index" class="chip" type="button" aria-pressed="false">Indexing</button>
+          </div>
+          <label class="vz-speed">Kecepatan <input id="vz-speed" type="range" min="1" max="10" value="6"></label>
+          <div class="vz-buttons">
+            <button id="vz-play" class="btn" type="button">Mulai</button>
+            <button id="vz-step" class="tool-btn" type="button">Langkah</button>
+            <button id="vz-reset" class="tool-btn" type="button">Reset</button>
+          </div>
+        </div>
+        <div class="vz-stats">
+          <div><small>File diperiksa</small><b id="vz-checked">0</b></div>
+          <div><small>Ditemukan</small><b id="vz-hits">0</b></div>
+          <div><small>Dilewati (indeks)</small><b id="vz-skipped">0</b></div>
+        </div>
+        <p id="vz-compare" class="vz-compare"></p>
+        <p id="vz-log" class="vz-log" aria-live="polite"></p>
+        <div class="vz-grid" id="vz-grid"></div>
+        <p class="vz-legend"><span class="is-cand">• kandidat indeks</span><span class="is-skip">– dilewati</span><span class="is-now">▶ sedang diperiksa</span><span class="is-hit">✓ cocok</span><span class="is-miss">✗ tidak cocok</span></p>
+        <h2>Pseudocode</h2>
+        <pre id="vz-code" class="vz-code"></pre>
+      </section>
+
       <!-- Pengaturan -->
       <section id="view-settings" class="view" aria-labelledby="t-settings" hidden>
         <h1 id="t-settings">Pengaturan</h1>
@@ -154,6 +186,7 @@
   <script src="data/files.js"></script>
   <script src="js/fileSystem.js"></script>
   <script src="js/search.js"></script>
+  <script src="js/visualizer.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>
