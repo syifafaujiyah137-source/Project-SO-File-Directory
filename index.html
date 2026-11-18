@@ -124,9 +124,27 @@
         </div>
         <h2>Tampilan</h2>
         <div class="panel">
-          <label class="setting"><span><b>Mode gelap</b><small>Gunakan tema gelap pada seluruh aplikasi. Matikan untuk memakai tema terang.</small></span>
-            <input type="checkbox" role="switch" class="switch" id="set-darkMode"></label>
+<label class="setting">
+    <span>
+        <b>Mode gelap</b>
+        <small id="theme-description">
+            Mode Gelap sedang digunakan
+        </small>
+    </span>
+
+    <div class="theme-control">
+        <span id="theme-icon">🌙</span>
+        <input
+            type="checkbox"
+            role="switch"
+            class="switch"
+            id="set-darkMode"
+        >
+    </div>
+</label>
         </div>
+          <label class="setting"><span><b>Ukuran font</b><small>Atur ukuran font di seluruh aplikasi.</small></span>
+            <span class="select"><select id="set-fontSize"></select></span></label>
       </section>
     </main>
   </div>
