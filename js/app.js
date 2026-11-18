@@ -142,6 +142,45 @@ function showToast(message) {
   toastTimer = setTimeout(() => { toast.hidden = true; }, 2800);
 }
 
+
+function setTheme(isDark) {
+  const themeIcon = $('theme-icon');
+  const themeDescription = $('theme-description');
+
+  document.body.classList.toggle('light-mode', !isDark);
+
+  if (themeIcon) {
+    themeIcon.textContent = isDark ? '🌙' : '☀️';
+  }
+
+  if (themeDescription) {
+    themeDescription.textContent = isDark
+      ? 'Mode Gelap sedang digunakan'
+      : 'Mode Terang sedang digunakan';
+  }
+
+  localStorage.setItem('darkMode', String(isDark));
+}
+
+function initTheme() {
+  const savedMode = localStorage.getItem('darkMode');
+  const darkSwitch = $('set-darkMode');
+
+  // Default menggunakan mode gelap
+  const isDark = savedMode === null
+   ? true
+    : savedMode === 'true';
+
+  darkSwitch.checked = isDark;
+  setTheme(isDark);
+
+  darkSwitch.addEventListener('change', function () {
+    setTheme(this.checked);
+  });
+}
+
+
+
 /* ---------- Data turunan (bukan logika pencarian) ---------- */
 
 function visibleFiles(files = getAllFiles()) {
@@ -576,14 +615,21 @@ function bindEvents() {
 
 async function init() {
   loadState();
+
   bindEvents();
-  try {
+
+  //Mengaktifkan pengaturan tema
+  initTheme();
+
+  try{
     await loadFiles();
   } catch (e) {
-    document.querySelector('.main').prepend(make('p', 'empty-note', 'Data file gagal dimuat. Periksa data/files.json dan data/files.js.'));
+    document.querySelectorAll('.main').prepend(make('p', 'empty-note', 'Data file Gagal dimuat. Periksa data/files.json dan data/files.js.'));
+
     return;
   }
+
   showView('home');
 }
 
-document.addEventListener('DOMContentLoaded', init);
+init();

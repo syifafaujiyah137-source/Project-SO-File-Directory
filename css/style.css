@@ -41,6 +41,18 @@
   --shadow: 0 1px 3px rgba(20,30,60,.14);
   color-scheme: light;
 }
+/*Mode Terang*/
+body.light-mode {
+  --bg: #f5f6fa;
+  --side: #ffffff;
+  --card: #ffffff;
+  --card-hover: #eeeef5;
+  --ink: #1b2236;
+  --muted: #6b7280;
+  --text: #1b2236;
+  --text-dim: #687386;
+}
+
 * { box-sizing: border-box; }
 html, body { height: 100%; margin: 0; }
 body { background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; }
@@ -218,4 +230,16 @@ h2 { margin: 24px 0 10px; font-size: 14px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .switch, .switch::after { transition: none; }
+}
+
+/* Ikon Mode Gelap Dan Terang */
+.theme-control {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+#theme-icon {
+  font-size: 24px;
+  transition:0.3s ease;
 }
