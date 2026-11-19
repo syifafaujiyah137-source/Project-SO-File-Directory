@@ -31,19 +31,27 @@ function toSearchText(text, ignoreCase) {
   return ignoreCase ? spaced.toLowerCase() : spaced;
 }
 
+// Memecah query menjadi daftar kata pencarian (kosong bila query kosong)
+function getQueryWords(query, ignoreCase = true) {
+  const normalized = normalizeQuery(query);
+  if (normalized === '') {
+    return [];
+  }
+  return toSearchText(normalized, ignoreCase)
+    .split(' ')
+    .filter((word) => word !== '');
+}
+
 // Mencocokkan nama file (kecocokan sebagian).
 // Query dipecah per kata; semua kata harus ada pada nama (urutan bebas).
 // Query kosong cocok dengan semua file.
 function matchName(file, query, ignoreCase = true) {
-  const normalized = normalizeQuery(query);
-  if (normalized === '') {
+  const words = getQueryWords(query, ignoreCase);
+  if (words.length === 0) {
     return true;
   }
   const name = toSearchText(file.name, ignoreCase);
-  return toSearchText(normalized, ignoreCase)
-    .split(' ')
-    .filter((word) => word !== '')
-    .every((word) => name.includes(word));
+  return words.every((word) => name.includes(word));
 }
 
 // Menyeragamkan filter ekstensi menjadi array huruf kecil tanpa titik.
@@ -108,34 +116,65 @@ function matchDate(file, range) {
   return true;
 }
 
-// Menentukan daftar file yang menjadi kandidat berdasarkan lokasi, ekstensi, dan file tersembunyi.
-// Tanpa lokasi dan dengan filter ekstensi tertentu, kandidat diambil dari indeks ekstensi
-// sehingga file berekstensi lain tidak perlu diperiksa.
-function getCandidateFiles(options, extension) {
+// Memilih sumber kandidat: folder, indeks nama, indeks ekstensi, atau semua file (linear).
+// Mengembalikan { files, method }; file tersembunyi sudah disaring bila perlu.
+// Indeks nama hanya dipakai saat huruf besar/kecil diabaikan (indeks disimpan huruf kecil).
+function getCandidateFiles(options, extension, words) {
   const wanted = normalizeExtensions(extension);
   let files;
+  let method;
   if (options.location) {
     files = getFilesByDirectory(options.location, options.includeSubfolders);
+    method = 'Folder';
+  } else if (words.length > 0 && options.ignoreCase) {
+    files = getFilesByNameWords(words);
+    method = 'Indeks nama';
   } else if (wanted.length > 0) {
     files = getFilesByExtension(wanted);
+    method = 'Indeks ekstensi';
   } else {
     files = getAllFiles();
+    method = 'Linear';
   }
-  return options.showHidden ? files : files.filter((file) => !file.hidden);
+  return { files: options.showHidden ? files : files.filter((file) => !file.hidden), method };
 }
 
-// Fungsi utama pencarian (linear search, O(n))
-function searchFiles(query, extension = EXTENSION_ALL, options = {}) {
+// Waktu sekarang dalam ms (tanpa DOM)
+function nowMs() {
+  return typeof performance !== 'undefined' ? performance.now() : Date.now();
+}
+
+// Pencarian dengan statistik: { files, stats: { method, examined, total, matched, elapsedMs } }
+function searchFilesWithStats(query, extension = EXTENSION_ALL, options = {}) {
+  const started = nowMs();
   const settings = { ...DEFAULT_SEARCH_OPTIONS, ...options };
   const dateRange = buildDateRange(settings.dateFrom, settings.dateTo);
+  const words = getQueryWords(query, settings.ignoreCase);
+  const candidates = getCandidateFiles(settings, extension, words);
 
-  return getCandidateFiles(settings, extension).filter(
+  const files = candidates.files.filter(
     (file) =>
       matchName(file, query, settings.ignoreCase) &&
       matchExtension(file, extension) &&
       matchSize(file, settings.minSize, settings.maxSize) &&
       matchDate(file, dateRange)
   );
+
+  return {
+    files,
+    stats: {
+      method: candidates.method,
+      examined: candidates.files.length,
+      total: countFiles(settings.showHidden),
+      matched: files.length,
+      elapsedMs: nowMs() - started
+    }
+  };
+}
+
+// Fungsi utama pencarian: hanya mengembalikan daftar file
+function searchFiles(query, extension = EXTENSION_ALL, options = {}) {
+  return searchFilesWithStats(query, extension, options).files;
 }
 
 // Membandingkan dua file berdasarkan key; nama dipakai sebagai pembanding cadangan
