@@ -243,3 +243,28 @@ h2 { margin: 24px 0 10px; font-size: 14px; }
   font-size: 24px;
   transition:0.3s ease;
 }
+
+/* ---------- Visualisasi algoritma ---------- */
+.vz-controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; padding: 14px; }
+.vz-input { flex: 1 1 200px; padding: 9px 12px; border: 0; border-radius: var(--radius); background: var(--card); color: var(--ink); font: inherit; font-size: 12px; }
+.vz-speed { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--text-dim); }
+.vz-buttons { display: flex; gap: 8px; margin-left: auto; }
+.vz-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 14px 0 8px; }
+.vz-stats div { background: var(--side); border-radius: var(--radius); padding: 10px 14px; }
+.vz-stats small { display: block; font-size: 10px; color: var(--text-dim); }
+.vz-stats b { font-size: 20px; }
+.vz-compare { margin: 4px 0; font-size: 11px; color: var(--text-dim); }
+.vz-log { min-height: 34px; margin: 8px 0 12px; padding: 10px 12px; border-radius: var(--radius); background: var(--side); font-size: 12px; }
+.vz-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(165px, 1fr)); gap: 8px; }
+.vz-cell { display: flex; align-items: center; gap: 6px; min-height: 38px; padding: 8px 10px; border: 2px solid transparent; border-radius: var(--radius); background: var(--side); color: var(--text); font-size: 11px; transition: background .2s, opacity .2s, border-color .2s; }
+.vz-cell .ico { width: 16px; height: 16px; flex: none; }
+.vz-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.vz-mark { width: 14px; text-align: center; font-weight: 700; }
+.vz-cell.is-cand { border-color: #e0a45c; }
+.vz-cell.is-skip { opacity: .3; }
+.vz-cell.is-hit { background: #14532d; border-color: #3ecf8e; }
+.vz-cell.is-miss { color: var(--text-dim); }
+.vz-cell.is-now { border-color: #fff; box-shadow: 0 0 0 3px rgba(185, 79, 176, .6); }
+.vz-legend { display: flex; flex-wrap: wrap; gap: 14px; margin: 12px 0; font-size: 11px; color: var(--text-dim); }
+.vz-code { margin: 0; padding: 14px; border-radius: var(--radius); background: var(--side); color: var(--text); font: 12px/1.6 Consolas, "Courier New", monospace; overflow-x: auto; }
+@media (max-width: 760px) { .vz-buttons { margin-left: 0; } .vz-stats { grid-template-columns: 1fr; } }
