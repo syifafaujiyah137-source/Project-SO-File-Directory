@@ -5,6 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>File Search Simulator</title>
   <link rel="stylesheet" href="css/style.css">
+  <script>
+    // Terapkan tema tersimpan sebelum halaman digambar agar tidak berkedip (cek mode terang)
+    try {
+      const saved = JSON.parse(localStorage.getItem('fileSearchSimulator') || '{}');
+      if (saved.appearance && saved.appearance.darkMode === false) document.documentElement.dataset.theme = 'light';
+    } catch (e) { /* abaikan */ }
+  </script>
 </head>
 <body>
   <div class="app">
@@ -61,6 +68,7 @@
                 </label>
               </div>
             </div>
+            <p class="stats-line" id="search-stats"></p>
             <div class="adv" id="adv-panel" hidden>
               <label class="field"><span>Ukuran file</span>
                 <span class="select"><select id="adv-size"></select></span></label>
@@ -89,6 +97,7 @@
         <div class="view-switch" role="group" aria-label="Tampilan folder">
           <button id="vs-cards" class="chip" type="button" aria-pressed="true">Kartu</button>
           <button id="vs-tree" class="chip" type="button" aria-pressed="false">Pohon</button>
+          <button id="new-file" class="btn new-file" type="button">+ File Baru</button>
         </div>
         <div class="folders" id="folders"></div>
         <nav class="tree" id="tree" aria-label="Pohon folder" hidden></nav>
@@ -156,30 +165,16 @@
         </div>
         <h2>Tampilan</h2>
         <div class="panel">
-<label class="setting">
-    <span>
-        <b>Mode gelap</b>
-        <small id="theme-description">
-            Mode Gelap sedang digunakan
-        </small>
-    </span>
-
-    <div class="theme-control">
-        <span id="theme-icon">🌙</span>
-        <input
-            type="checkbox"
-            role="switch"
-            class="switch"
-            id="set-darkMode"
-        >
-    </div>
-</label>
-        </div>
+          <label class="setting"><span><b>Mode gelap</b><small id="theme-description">Mode gelap sedang digunakan</small></span>
+            <span class="theme-control"><span id="theme-icon" aria-hidden="true">🌙</span>
+              <input type="checkbox" role="switch" class="switch" id="set-darkMode"></span></label>
           <label class="setting"><span><b>Ukuran font</b><small>Atur ukuran font di seluruh aplikasi.</small></span>
             <span class="select"><select id="set-fontSize"></select></span></label>
+        </div>
       </section>
     </main>
   </div>
+  <dialog id="dialog" class="dialog" aria-labelledby="dialog-title"></dialog>
   <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 
   <!-- Urutan penting: data → file system → pencarian → UI -->
