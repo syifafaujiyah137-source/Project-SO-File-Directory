@@ -1,6 +1,8 @@
 // app.js — hanya mengurus UI dan event (tanpa logika pencarian).
 // Bergantung pada: loadFiles, getAllFiles, getFilesByDirectory, getDirectory (fileSystem.js)
 //                  searchFiles, sortFiles (search.js)
+//                  initDisk, allocateFile, freeFile, describeAllocation (disk.js)
+//                  renderVisual (visualizer.js), renderDisk (diskView.js)
 
 const STORAGE_KEY = 'fileSearchSimulator';
 const ROOT_PATH = 'D:\\';
@@ -313,7 +315,8 @@ function renderDetail(file) {
     return;
   }
   const dl = make('dl');
-  [['Jenis', TYPE_LABELS[file.extension]], ['Lokasi', getDirectory(file)], ['Ukuran', formatSize(file.size)], ['Tanggal', formatDate(file.modifiedAt, true)]]
+  // Baris "Blok" menampilkan lokasi file pada disk simulasi (disk.js)
+  [['Jenis', TYPE_LABELS[file.extension]], ['Lokasi', getDirectory(file)], ['Ukuran', formatSize(file.size)], ['Blok', describeAllocation(file.id)], ['Tanggal', formatDate(file.modifiedAt, true)]]
     .forEach(([k, v]) => dl.append(make('dt', '', k), make('dd', '', v)));
   const open = make('button', 'btn', 'Buka File');
   open.type = 'button';
@@ -516,7 +519,8 @@ function renderSettings() {
   applyAppearance();
 }
 
-const RENDERERS = { home: renderHome, search: renderSearch, files: renderFiles, recent: renderRecent, visual: renderVisual, settings: renderSettings };
+// renderVisual ada di visualizer.js, renderDisk ada di diskView.js
+const RENDERERS = { home: renderHome, search: renderSearch, files: renderFiles, recent: renderRecent, visual: renderVisual, disk: renderDisk, settings: renderSettings };
 
 function showView(name) {
   state.view = name;
@@ -606,6 +610,12 @@ function openCreateDialog() {
       const kb = v.size.trim() === '' ? NaN : Number(v.size);
       const result = createFile({ name: v.name, extension: v.extension, directory: v.directory, size: kb * 1024 });
       if (!result.ok) return result.error;
+      // Alokasikan blok disk; bila gagal (disk penuh/terfragmentasi), batalkan pembuatan file
+      const alloc = allocateFile(result.file);
+      if (!alloc.ok) {
+        deleteFile(result.file.id);
+        return alloc.error;
+      }
       showToast('File dibuat: ' + result.file.path);
       refreshView();
       return '';
@@ -637,6 +647,7 @@ function openDeleteDialog(file) {
     onSubmit: () => {
       const result = deleteFile(file.id);
       if (!result.ok) return result.error;
+      freeFile(file.id); // bebaskan blok disk milik file
       showToast('File dihapus: ' + file.name + '.' + file.extension);
       refreshView();
       return '';
@@ -729,6 +740,7 @@ async function init() {
     document.querySelector('.main').prepend(make('p', 'empty-note', 'Data file gagal dimuat. Periksa data/files.json dan data/files.js.'));
     return;
   }
+  initDisk(getAllFiles(), DEFAULT_ALLOC_METHOD); // alokasikan semua file ke blok disk simulasi
   showView('home');
 }
 
