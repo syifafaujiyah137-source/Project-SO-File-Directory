@@ -26,6 +26,7 @@
         <button class="nav-item" data-view="files" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h7l2 2h9v11H3z"/></svg>File Saya</button>
         <button class="nav-item" data-view="recent" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 3-6.2M4 4v4h4M12 8v5l3 2"/></svg>Terbaru</button>
         <button class="nav-item" data-view="visual" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20v-6M12 20V5M19 20v-9"/></svg>Visualisasi</button>
+        <button class="nav-item" data-view="disk" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg>Disk</button>
         <button class="nav-item" data-view="settings" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></svg>Pengaturan</button>
       </nav>
       <p class="tip">Cari file dengan nama atau jenis ekstensi file.</p>
@@ -143,6 +144,30 @@
         <pre id="vz-code" class="vz-code"></pre>
       </section>
 
+      <!-- Simulasi Alokasi Disk -->
+      <section id="view-disk" class="view" aria-labelledby="t-disk" hidden>
+        <h1 id="t-disk">Simulasi Alokasi Disk</h1>
+        <p class="sub">Lihat bagaimana sistem operasi menempatkan file pada blok-blok disk. 1 blok = 4 MB, disk = 256 blok (1 GB).</p>
+        <div class="panel dk-controls">
+          <div class="chips" id="dk-methods" role="group" aria-label="Metode alokasi"></div>
+          <div class="dk-buttons">
+            <button id="dk-new" class="btn" type="button">+ File Baru</button>
+            <button id="dk-delete" class="tool-btn" type="button">Hapus File</button>
+            <button id="dk-defrag" class="tool-btn" type="button">Defragmentasi</button>
+          </div>
+        </div>
+        <p id="dk-desc" class="dk-desc"></p>
+        <div class="dk-stats" id="dk-stats"></div>
+        <div class="dk-grid" id="dk-grid" role="group" aria-label="Peta blok disk"></div>
+        <p class="dk-legend"><span class="lg-pdf">PDF</span><span class="lg-docx">DOCX</span><span class="lg-img">JPG/PNG</span><span class="lg-mp4">MP4</span><span class="lg-index">Index block</span><span class="lg-free">Kosong</span></p>
+        <h2>Detail Alokasi</h2>
+        <div class="panel dk-info" id="dk-info"></div>
+        <h2>File di Disk</h2>
+        <div class="dk-files" id="dk-files"></div>
+        <h2>Log Operasi</h2>
+        <ul class="dk-log" id="dk-log" aria-live="polite"></ul>
+      </section>
+
       <!-- Pengaturan -->
       <section id="view-settings" class="view" aria-labelledby="t-settings" hidden>
         <h1 id="t-settings">Pengaturan</h1>
@@ -177,11 +202,13 @@
   <dialog id="dialog" class="dialog" aria-labelledby="dialog-title"></dialog>
   <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 
-  <!-- Urutan penting: data → file system → pencarian → UI -->
+  <!-- Urutan penting: data → file system → pencarian → disk → tampilan → UI utama -->
   <script src="data/files.js"></script>
   <script src="js/fileSystem.js"></script>
   <script src="js/search.js"></script>
+  <script src="js/disk.js"></script>
   <script src="js/visualizer.js"></script>
+  <script src="js/diskView.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>
