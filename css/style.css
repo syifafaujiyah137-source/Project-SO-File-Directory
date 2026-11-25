@@ -1,45 +1,45 @@
 :root {
-  --bg: #0f1a2e;
-  --side: #16233f;
-  --card: #d9d9d9;
-  --card-hover: #e6e6e6;
-  --ink: #1b2236;
-  --muted: #4b5563; /* cukup gelap agar terbaca di atas kartu abu-abu (rasio > 4,5) */
-  --text: #f3f5fa;
-  --text-dim: #aab3c5;
-  --grad: linear-gradient(90deg, #b94fb0, #d96b80);
-  --nav-hover: rgba(255,255,255,.06);
-  --line: #c4c4c4;
-  --line-strong: #b8b8b8;
-  --field: #fff;
-  --side-line: transparent;
-  --tip-bg: linear-gradient(135deg, #5b3a78, #7a4560);
-  --tip-text: #f0dff0;
-  --toggle-off: #9aa0ab;
+  --bg: #1C1C1C;
+  --side: #202020;
+  --card: #2B2B2B;
+  --card-hover: #383838;
+  --ink: #F3F3F3;
+  --muted: #BDBDBD;
+  --text: #F3F3F3;
+  --text-dim: #AAAAAA;
+  --grad: linear-gradient(90deg, #168BCB, #38BDF8);
+  --nav-hover: rgba(255,255,255,.07);
+  --line: #3A3A3A;
+  --line-strong: #505050;
+  --field: #292929;
+  --side-line: #303030;
+  --tip-bg: linear-gradient(135deg, #303030, #252525);
+  --tip-text: #F3F3F3;
+  --toggle-off: #666666;
   --shadow: none;
-  --radius: 10px;
-  --fs: 1; /* skala ukuran font (Pengaturan > Ukuran font) */
-  --font: "Space Grotesk", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --radius: 8px;
+  --fs: 1;
+  --font: "Segoe UI", "Space Grotesk", system-ui, sans-serif;
   color-scheme: dark;
 }
 
 /* Tema terang: diaktifkan lewat <html data-theme="light"> (tombol Mode gelap di Pengaturan) */
 :root[data-theme="light"] {
-  --bg: #eef1f7;
-  --side: #ffffff;
-  --card: #ffffff;
-  --card-hover: #f4eaf6;
-  --muted: #5f6878;
-  --text: #1b2236;
-  --text-dim: #566074;
-  --nav-hover: rgba(27,34,54,.06);
-  --line: #e1e5ee;
-  --line-strong: #c3c9d6;
-  --side-line: #e1e5ee;
-  --tip-bg: linear-gradient(135deg, #f0def3, #f9dfe6);
-  --tip-text: #5a3a6a;
-  --toggle-off: #aab1bf;
-  --shadow: 0 1px 3px rgba(20,30,60,.14);
+  --bg: #F3F3F3;
+  --side: #FFFFFF;
+  --card: #FFFFFF;
+  --card-hover: #EAEAEA;
+  --muted: #606060;
+  --text: #202020;
+  --text-dim: #666666;
+  --nav-hover: rgba(0,0,0,.06);
+  --line: #DDDDDD;
+  --line-strong: #C5C5C5;
+  --side-line: #DDDDDD;
+  --tip-bg: linear-gradient(135deg, #E8F4FA, #DCECF5);
+  --tip-text: #244B60;
+  --toggle-off: #AAB1BF;
+  --shadow: 0 1px 3px rgba(0,0,0,.10);
   color-scheme: light;
 }
 
@@ -190,7 +190,7 @@ h2 { margin: 24px 0 10px; font-size: calc(14px * var(--fs)); }
 .setting small { font-size: calc(10px * var(--fs)); color: var(--muted); }
 .switch { appearance: none; flex: none; position: relative; width: 40px; height: 22px; margin: 0; border-radius: 11px; background: var(--toggle-off); transition: background .15s; cursor: pointer; }
 .switch::after { content: ""; position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; border-radius: 50%; background: #fff; transition: transform .15s; }
-.switch:checked { background: #c35aa8; }
+.switch:checked { background: #38BDF8; }
 .switch:checked::after { transform: translateX(18px); }
 .switch:disabled { opacity: .6; cursor: not-allowed; }
 
