@@ -1,6 +1,8 @@
 // app.js — hanya mengurus UI dan event (tanpa logika pencarian).
 // Bergantung pada: loadFiles, getAllFiles, getFilesByDirectory, getDirectory (fileSystem.js)
 //                  searchFiles, sortFiles (search.js)
+//                  initDisk, allocateFile, freeFile, describeAllocation (disk.js)
+//                  renderVisual (visualizer.js), renderDisk (diskView.js)
 
 const STORAGE_KEY = 'fileSearchSimulator';
 const ROOT_PATH = 'D:\\';
@@ -34,6 +36,14 @@ const SIZE_RANGES = [
   { label: 'Besar (> 10 MB)', min: 10 * MB + 1, max: null }
 ];
 
+// Skala ukuran font; dipakai lewat variabel CSS --fs
+const FONT_SIZES = [
+  { value: 'small', label: 'Kecil', scale: 0.9 },
+  { value: 'normal', label: 'Normal', scale: 1 },
+  { value: 'large', label: 'Besar', scale: 1.15 },
+  { value: 'xlarge', label: 'Sangat besar', scale: 1.3 }
+];
+
 const TYPE_LABELS = { pdf: 'PDF', docx: 'Docs', jpg: 'JPG', png: 'PNG', mp4: 'MP4' };
 
 // Ikon statis (aman untuk innerHTML karena bukan data pengguna)
@@ -52,11 +62,13 @@ const state = {
   filterIndex: 0,
   sortIndex: 0,
   selectedId: null,
+  stats: null,                   // statistik pencarian terakhir
   advanced: { sizeIndex: 0, dateFrom: '', dateTo: '' }, // filter per pencarian, tidak disimpan
   folder: ROOT_PATH,
   filesView: 'cards',            // 'cards' atau 'tree' (tidak disimpan)
   expanded: new Set([ROOT_PATH.toLowerCase()]), // folder yang terbuka pada pohon
-  settings: { ignoreCase: true, includeSubfolders: true, showHidden: false, location: '', darkMode: true },
+  settings: { ignoreCase: true, includeSubfolders: true, showHidden: false, location: '' },
+  appearance: { darkMode: true, fontSize: 'normal' },
   history: [],
   openedIds: [],
   searchCount: { date: '', count: 0 }
@@ -64,14 +76,6 @@ const state = {
 
 let recordTimer = null;
 let toastTimer = null;
-
-/* ---------- Tema ---------- */
-
-// Tema gelap adalah bawaan (sesuai desain); tema terang memakai atribut data-theme="light"
-function applyTheme() {
-  const dark = state.settings.darkMode !== false;
-  document.documentElement.dataset.theme = dark ? 'dark' : 'light';
-}
 
 /* ---------- Penyimpanan (localStorage, opsional) ---------- */
 
@@ -82,19 +86,32 @@ function loadState() {
     if (Array.isArray(saved.history)) state.history = saved.history;
     if (Array.isArray(saved.openedIds)) state.openedIds = saved.openedIds;
     if (saved.searchCount) state.searchCount = saved.searchCount;
+    Object.assign(state.appearance, saved.appearance);
   } catch (e) {
     // localStorage tidak tersedia atau data rusak: pakai nilai bawaan
   }
-  applyTheme();
 }
 
 function saveState() {
   try {
-    const { settings, history, openedIds, searchCount } = state;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ settings, history, openedIds, searchCount }));
+    const { settings, appearance, history, openedIds, searchCount } = state;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ settings, appearance, history, openedIds, searchCount }));
   } catch (e) {
     // abaikan; aplikasi tetap berjalan tanpa penyimpanan
   }
+}
+
+/* ---------- Tampilan (tema dan ukuran font) ---------- */
+
+function applyAppearance() {
+  const { darkMode, fontSize } = state.appearance;
+  const size = FONT_SIZES.find((f) => f.value === fontSize) || FONT_SIZES[1];
+  document.documentElement.dataset.theme = darkMode ? 'dark' : 'light';
+  document.documentElement.style.setProperty('--fs', String(size.scale));
+  const icon = document.getElementById('theme-icon');
+  const text = document.getElementById('theme-description');
+  if (icon) icon.textContent = darkMode ? '🌙' : '☀️';
+  if (text) text.textContent = darkMode ? 'Mode gelap sedang digunakan' : 'Mode terang sedang digunakan';
 }
 
 /* ---------- Pemformat ---------- */
@@ -104,6 +121,10 @@ function formatSize(bytes) {
   if (bytes < 1024 * 1024) return Math.round(bytes / 1024) + ' KB';
   if (bytes < 1024 * 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
   return (bytes / (1024 * 1024 * 1024)).toFixed(1) + ' GB';
+}
+
+function formatMs(ms) {
+  return (ms < 0.01 ? '<0,01' : ms.toFixed(2).replace('.', ',')) + ' ms';
 }
 
 function pad(n) {
@@ -141,45 +162,6 @@ function showToast(message) {
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => { toast.hidden = true; }, 2800);
 }
-
-
-function setTheme(isDark) {
-  const themeIcon = $('theme-icon');
-  const themeDescription = $('theme-description');
-
-  document.body.classList.toggle('light-mode', !isDark);
-
-  if (themeIcon) {
-    themeIcon.textContent = isDark ? '🌙' : '☀️';
-  }
-
-  if (themeDescription) {
-    themeDescription.textContent = isDark
-      ? 'Mode Gelap sedang digunakan'
-      : 'Mode Terang sedang digunakan';
-  }
-
-  localStorage.setItem('darkMode', String(isDark));
-}
-
-function initTheme() {
-  const savedMode = localStorage.getItem('darkMode');
-  const darkSwitch = $('set-darkMode');
-
-  // Default menggunakan mode gelap
-  const isDark = savedMode === null
-   ? true
-    : savedMode === 'true';
-
-  darkSwitch.checked = isDark;
-  setTheme(isDark);
-
-  darkSwitch.addEventListener('change', function () {
-    setTheme(this.checked);
-  });
-}
-
-
 
 /* ---------- Data turunan (bukan logika pencarian) ---------- */
 
@@ -225,8 +207,9 @@ function resetAdvanced() {
 function currentResults() {
   const filter = FILTERS[state.filterIndex];
   const sort = SORTS[state.sortIndex];
-  const found = searchFiles(state.query, filter.value, searchOptions());
-  return sortFiles(found, sort.key, sort.order);
+  const found = searchFilesWithStats(state.query, filter.value, searchOptions());
+  state.stats = found.stats;
+  return sortFiles(found.files, sort.key, sort.order);
 }
 
 /* ---------- Riwayat pencarian ---------- */
@@ -332,12 +315,20 @@ function renderDetail(file) {
     return;
   }
   const dl = make('dl');
-  [['Jenis', TYPE_LABELS[file.extension]], ['Lokasi', getDirectory(file)], ['Ukuran', formatSize(file.size)], ['Tanggal', formatDate(file.modifiedAt, true)]]
+  // Baris "Blok" menampilkan lokasi file pada disk simulasi (disk.js)
+  [['Jenis', TYPE_LABELS[file.extension]], ['Lokasi', getDirectory(file)], ['Ukuran', formatSize(file.size)], ['Blok', describeAllocation(file.id)], ['Tanggal', formatDate(file.modifiedAt, true)]]
     .forEach(([k, v]) => dl.append(make('dt', '', k), make('dd', '', v)));
   const open = make('button', 'btn', 'Buka File');
   open.type = 'button';
   open.addEventListener('click', () => openFile(file));
-  box.append(iconNode(file.extension, 'detail-ico'), make('h3', '', file.name + '.' + file.extension), dl, open);
+  const actions = make('div', 'detail-actions');
+  const rename = make('button', 'btn btn-secondary', 'Ganti Nama');
+  const remove = make('button', 'btn btn-danger', 'Hapus');
+  rename.type = remove.type = 'button';
+  rename.addEventListener('click', () => openRenameDialog(file));
+  remove.addEventListener('click', () => openDeleteDialog(file));
+  actions.append(rename, remove);
+  box.append(iconNode(file.extension, 'detail-ico'), make('h3', '', file.name + '.' + file.extension), dl, open, actions);
 }
 
 function renderAdvanced() {
@@ -362,6 +353,8 @@ function renderSearch() {
     state.selectedId = results.length ? results[0].id : null;
   }
   $('result-count').textContent = 'Hasil Pencarian: ' + results.length + ' file ditemukan';
+  const s = state.stats;
+  $('search-stats').textContent = 'Metode: ' + s.method + ' · memeriksa ' + s.examined + ' dari ' + s.total + ' file · ' + formatMs(s.elapsedMs);
 
   const list = $('results');
   list.replaceChildren();
@@ -514,15 +507,20 @@ function renderSettings() {
   ['ignoreCase', 'includeSubfolders', 'showHidden'].forEach((key) => {
     $('set-' + key).checked = state.settings[key];
   });
-  $('set-darkMode').checked = state.settings.darkMode !== false;
   const select = $('set-location');
   select.replaceChildren();
   select.append(new Option('D:\\ (Semua folder)', ''));
   topFolders().forEach((name) => select.append(new Option(ROOT_PATH + name, ROOT_PATH + name)));
   select.value = state.settings.location;
+  const fontSelect = $('set-fontSize');
+  if (!fontSelect.options.length) FONT_SIZES.forEach((f) => fontSelect.append(new Option(f.label, f.value)));
+  fontSelect.value = state.appearance.fontSize;
+  $('set-darkMode').checked = state.appearance.darkMode;
+  applyAppearance();
 }
 
-const RENDERERS = { home: renderHome, search: renderSearch, files: renderFiles, recent: renderRecent, visual: renderVisual, settings: renderSettings };
+// renderVisual ada di visualizer.js, renderDisk ada di diskView.js
+const RENDERERS = { home: renderHome, search: renderSearch, files: renderFiles, recent: renderRecent, visual: renderVisual, disk: renderDisk, settings: renderSettings };
 
 function showView(name) {
   state.view = name;
@@ -536,13 +534,199 @@ function showView(name) {
   if (name === 'search') $('search-input').focus({ preventScroll: true });
 }
 
+/* ---------- Dialog dan operasi file ---------- */
+
+function buildField(spec) {
+  const label = make('label', 'field');
+  label.append(make('span', '', spec.label));
+  let input;
+  if (spec.options) {
+    input = make('select');
+    spec.options.forEach((o) => input.append(new Option(o.label, o.value)));
+  } else {
+    input = make('input');
+    input.type = spec.type || 'text';
+    if (spec.min !== undefined) input.min = spec.min;
+  }
+  input.value = spec.value;
+  label.append(input);
+  return { label, input };
+}
+
+// Dialog serupa untuk buat, ganti nama, dan hapus. onSubmit mengembalikan pesan galat atau ''.
+function openDialog({ title, message, fields = [], confirmLabel, danger = false, onSubmit }) {
+  const dialog = $('dialog');
+  const form = make('form', 'dialog-form');
+  const heading = make('h3', '', title);
+  heading.id = 'dialog-title';
+  form.append(heading);
+  if (message) form.append(make('p', 'dialog-msg', message));
+  const inputs = {};
+  fields.forEach((spec) => {
+    const built = buildField(spec);
+    inputs[spec.key] = built.input;
+    form.append(built.label);
+  });
+  const error = make('p', 'dialog-error');
+  error.setAttribute('role', 'alert');
+  error.hidden = true;
+  const cancel = make('button', 'btn btn-secondary', 'Batal');
+  cancel.type = 'button';
+  cancel.addEventListener('click', () => dialog.close());
+  const confirm = make('button', danger ? 'btn btn-danger' : 'btn', confirmLabel);
+  confirm.type = 'submit';
+  const actions = make('div', 'dialog-actions');
+  actions.append(cancel, confirm);
+  form.append(error, actions);
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const values = {};
+    Object.keys(inputs).forEach((key) => { values[key] = inputs[key].value; });
+    const message = onSubmit(values);
+    if (message) { error.textContent = message; error.hidden = false; } else { dialog.close(); }
+  });
+  dialog.replaceChildren(form);
+  dialog.showModal();
+  const first = form.querySelector('input, select');
+  if (first) first.focus(); else confirm.focus();
+}
+
+function refreshView() {
+  RENDERERS[state.view]();
+}
+
+function openCreateDialog() {
+  const folders = getFolderPaths().map((p) => ({ value: p, label: p }));
+  openDialog({
+    title: 'File Baru',
+    confirmLabel: 'Buat',
+    fields: [
+      { key: 'name', label: 'Nama file (tanpa ekstensi)', value: '' },
+      { key: 'extension', label: 'Ekstensi', value: 'pdf', options: SUPPORTED_EXTENSIONS.map((e) => ({ value: e, label: '.' + e })) },
+      { key: 'directory', label: 'Folder', value: findFolderPath(state.folder) || ROOT_PATH, options: folders },
+      { key: 'size', label: 'Ukuran (KB)', type: 'number', min: 0, value: '100' }
+    ],
+    onSubmit: (v) => {
+      const kb = v.size.trim() === '' ? NaN : Number(v.size);
+      const result = createFile({ name: v.name, extension: v.extension, directory: v.directory, size: kb * 1024 });
+      if (!result.ok) return result.error;
+      // Alokasikan blok disk; bila gagal (disk penuh/terfragmentasi), batalkan pembuatan file
+      const alloc = allocateFile(result.file);
+      if (!alloc.ok) {
+        deleteFile(result.file.id);
+        return alloc.error;
+      }
+      showToast('File dibuat: ' + result.file.path);
+      refreshView();
+      return '';
+    }
+  });
+}
+
+function openRenameDialog(file) {
+  openDialog({
+    title: 'Ganti Nama',
+    confirmLabel: 'Simpan',
+    fields: [{ key: 'name', label: 'Nama baru (ekstensi .' + file.extension + ' tetap)', value: file.name }],
+    onSubmit: (v) => {
+      const result = renameFile(file.id, v.name);
+      if (!result.ok) return result.error;
+      showToast('Nama diganti: ' + result.file.name + '.' + result.file.extension);
+      refreshView();
+      return '';
+    }
+  });
+}
+
+function openDeleteDialog(file) {
+  openDialog({
+    title: 'Hapus file?',
+    message: 'Hapus "' + file.name + '.' + file.extension + '" dari simulasi? File asli di komputer Anda tidak terpengaruh, dan data kembali saat halaman dimuat ulang.',
+    confirmLabel: 'Hapus',
+    danger: true,
+    onSubmit: () => {
+      const result = deleteFile(file.id);
+      if (!result.ok) return result.error;
+      freeFile(file.id); // bebaskan blok disk milik file
+      showToast('File dihapus: ' + file.name + '.' + file.extension);
+      refreshView();
+      return '';
+    }
+  });
+}
+
 /* ---------- Aksi ---------- */
 
+
 function openFile(file) {
-  state.openedIds = [file.id, ...state.openedIds.filter((id) => id !== file.id)].slice(0, 10);
+  // Simpan riwayat file yang dibuka
+  state.openedIds = [
+    file.id,
+    ...state.openedIds.filter((id) => id !== file.id)
+  ].slice(0, 10);
+
   saveState();
-  showToast('Simulasi: membuka ' + file.name + '.' + file.extension);
+
+  const dialog = $('dialog');
+  dialog.className = 'dialog preview-dialog';
+  dialog.replaceChildren();
+
+  // Header preview
+  const header = make('div', 'preview-header');
+
+  const titleArea = make('div', 'preview-title');
+  titleArea.append(
+    make('h2', '', file.name + '.' + file.extension),
+    make('span', '', 'Pratinjau File')
+  );
+
+  const close = make('button', 'preview-close', '×');
+  close.type = 'button';
+  close.setAttribute('aria-label', 'Tutup preview');
+  close.addEventListener('click', () => dialog.close());
+
+  header.append(titleArea, close);
+
+  // Informasi file
+  const info = make('div', 'preview-info');
+  info.append(
+    make('span', '', 'Jenis: ' + file.extension.toUpperCase()),
+    make('span', '', 'Ukuran: ' + formatSize(file.size)),
+    make('span', '', 'Lokasi: ' + getDirectory(file))
+  );
+
+  // Area untuk melihat isi file
+  const canvas = make('div', 'preview-canvas');
+  const ext = file.extension.toLowerCase();
+
+  const previewIcon = {
+    pdf: '📄',
+    docx: '📝',
+    jpg: '🖼️',
+    png: '🖼️',
+    mp4: '🎬'
+  };
+
+  canvas.append(
+    make('div', 'preview-placeholder-icon', previewIcon[ext] || '📁'),
+    make('h3', '', 'Pratinjau ' + ext.toUpperCase()),
+    make('p', '', 'Area tampilan isi file ' + file.name + '.' + ext),
+    make('p', 'preview-note', 'Konten file belum tersedia. Area ini siap digunakan untuk menampilkan isi file.')
+  );
+
+  // Footer
+  const footer = make('div', 'preview-footer');
+
+  const back = make('button', 'btn', 'Kembali');
+  back.type = 'button';
+  back.addEventListener('click', () => dialog.close());
+
+  footer.append(back);
+
+  dialog.append(header, info, canvas, footer);
+  dialog.showModal();
 }
+
 
 function resetSearch() {
   state.query = '';
@@ -591,6 +775,7 @@ function bindEvents() {
     renderAdvanced();
   });
 
+  $('new-file').addEventListener('click', openCreateDialog);
   $('vs-cards').addEventListener('click', () => { state.filesView = 'cards'; renderFiles(); });
   $('vs-tree').addEventListener('click', () => { state.filesView = 'tree'; expandTo(state.folder); renderFiles(); });
   $('location-up').addEventListener('click', () => { state.folder = ROOT_PATH; renderFiles(); });
@@ -598,12 +783,9 @@ function bindEvents() {
   ['ignoreCase', 'includeSubfolders', 'showHidden'].forEach((key) => {
     $('set-' + key).addEventListener('change', (e) => { state.settings[key] = e.target.checked; saveState(); });
   });
-  $('set-darkMode').addEventListener('change', (e) => {
-    state.settings.darkMode = e.target.checked;
-    applyTheme();
-    saveState();
-  });
   $('set-location').addEventListener('change', (e) => { state.settings.location = e.target.value; saveState(); });
+  $('set-darkMode').addEventListener('change', (e) => { state.appearance.darkMode = e.target.checked; applyAppearance(); saveState(); });
+  $('set-fontSize').addEventListener('change', (e) => { state.appearance.fontSize = e.target.value; applyAppearance(); saveState(); });
   $('clear-history').addEventListener('click', () => {
     state.history = [];
     saveState();
@@ -615,21 +797,16 @@ function bindEvents() {
 
 async function init() {
   loadState();
-
+  applyAppearance();
   bindEvents();
-
-  //Mengaktifkan pengaturan tema
-  initTheme();
-
-  try{
+  try {
     await loadFiles();
   } catch (e) {
-    document.querySelectorAll('.main').prepend(make('p', 'empty-note', 'Data file Gagal dimuat. Periksa data/files.json dan data/files.js.'));
-
+    document.querySelector('.main').prepend(make('p', 'empty-note', 'Data file gagal dimuat. Periksa data/files.json dan data/files.js.'));
     return;
   }
-
+  initDisk(getAllFiles(), DEFAULT_ALLOC_METHOD); // alokasikan semua file ke blok disk simulasi
   showView('home');
 }
 
-init();
+document.addEventListener('DOMContentLoaded', init);
