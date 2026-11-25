@@ -657,11 +657,76 @@ function openDeleteDialog(file) {
 
 /* ---------- Aksi ---------- */
 
+
 function openFile(file) {
-  state.openedIds = [file.id, ...state.openedIds.filter((id) => id !== file.id)].slice(0, 10);
+  // Simpan riwayat file yang dibuka
+  state.openedIds = [
+    file.id,
+    ...state.openedIds.filter((id) => id !== file.id)
+  ].slice(0, 10);
+
   saveState();
-  showToast('Simulasi: membuka ' + file.name + '.' + file.extension);
+
+  const dialog = $('dialog');
+  dialog.className = 'dialog preview-dialog';
+  dialog.replaceChildren();
+
+  // Header preview
+  const header = make('div', 'preview-header');
+
+  const titleArea = make('div', 'preview-title');
+  titleArea.append(
+    make('h2', '', file.name + '.' + file.extension),
+    make('span', '', 'Pratinjau File')
+  );
+
+  const close = make('button', 'preview-close', '×');
+  close.type = 'button';
+  close.setAttribute('aria-label', 'Tutup preview');
+  close.addEventListener('click', () => dialog.close());
+
+  header.append(titleArea, close);
+
+  // Informasi file
+  const info = make('div', 'preview-info');
+  info.append(
+    make('span', '', 'Jenis: ' + file.extension.toUpperCase()),
+    make('span', '', 'Ukuran: ' + formatSize(file.size)),
+    make('span', '', 'Lokasi: ' + getDirectory(file))
+  );
+
+  // Area untuk melihat isi file
+  const canvas = make('div', 'preview-canvas');
+  const ext = file.extension.toLowerCase();
+
+  const previewIcon = {
+    pdf: '📄',
+    docx: '📝',
+    jpg: '🖼️',
+    png: '🖼️',
+    mp4: '🎬'
+  };
+
+  canvas.append(
+    make('div', 'preview-placeholder-icon', previewIcon[ext] || '📁'),
+    make('h3', '', 'Pratinjau ' + ext.toUpperCase()),
+    make('p', '', 'Area tampilan isi file ' + file.name + '.' + ext),
+    make('p', 'preview-note', 'Konten file belum tersedia. Area ini siap digunakan untuk menampilkan isi file.')
+  );
+
+  // Footer
+  const footer = make('div', 'preview-footer');
+
+  const back = make('button', 'btn', 'Kembali');
+  back.type = 'button';
+  back.addEventListener('click', () => dialog.close());
+
+  footer.append(back);
+
+  dialog.append(header, info, canvas, footer);
+  dialog.showModal();
 }
+
 
 function resetSearch() {
   state.query = '';
